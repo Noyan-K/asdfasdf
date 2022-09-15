@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { TypeOrmConfig } from './config/typeorm.config';
+import { DatabaseConfiguration } from './config/typeorm.config';
 
 @Module({
   imports: [
@@ -9,9 +9,7 @@ import { TypeOrmConfig } from './config/typeorm.config';
       envFilePath: `.${process.env.NODE_ENV}.env`,
     }),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: TypeOrmConfig,
+      useClass: DatabaseConfiguration,
     }),
   ],
 })

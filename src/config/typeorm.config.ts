@@ -1,47 +1,37 @@
-import { ConfigService } from '@nestjs/config';
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import * as dotenv from 'dotenv';
 
-export const TypeOrmConfig = async (
-  configService: ConfigService,
-): Promise<TypeOrmModuleOptions> => {
-  return {
-    type: 'postgres',
-    host: configService.get('TYPEORM_HOST'),
-    port: configService.get('TYPEORM_PORT'),
-    username: configService.get('TYPEORM_USERNAME'),
-    password: configService.get('TYPEORM_PASSWORD'),
-    database: configService.get('TYPEORM_DATABASE'),
-    synchronize: configService.get('TYPEORM_SYNCHONIZE'),
-    logging: configService.get('TYPEORM_LOGGING'),
-    entities: [configService.get('TYPEORM_ENTITIES')],
-    migrations: [configService.get('TYPEORM_MIGRATIONS')],
-  };
-};
+dotenv.config({ path: __dirname + '/../../.production.env' });
 
-export const AppDataSource = new DataSource({
+export class DatabaseConfiguration implements TypeOrmOptionsFactory {
+  createTypeOrmOptions(): TypeOrmModuleOptions | Promise<TypeOrmModuleOptions> {
+    return {
+      type: 'postgres',
+      host: process.env.TYPEORM_HOST,
+      port: Number(process.env.TYPEORM_PORT),
+      username: process.env.TYPEORM_USERNAME,
+      password: process.env.TYPEORM_PASSWORD,
+      database: process.env.TYPEORM_DATABASE,
+      synchronize: Boolean(process.env.TYPEORM_SYNCHONIZE),
+      logging: Boolean(process.env.TYPEORM_LOGGING),
+      entities: [process.env.TYPEORM_ENTITIES],
+      migrations: [process.env.TYPEORM_MIGRATIONS],
+    };
+  }
+}
+
+export const typeOrmMigrationConfig = new DataSource({
   type: 'postgres',
-  host: 'db',
-  port: 5432,
-  username: 'postgres1',
-  password: '1234',
-  database: 'postgres',
-  synchronize: false,
-  logging: true,
-  entities: ['dist/**/*entity.js'],
-  migrations: ['dist/migrations/*.js'],
-  subscribers: ['src/subscriber/**/*{.ts,.js}'],
-  migrationsTableName: 'migrations',
-  // type: 'postgres',
-  // host: configService.get('TYPEORM_HOST'),
-  // port: configService.get('TYPEORM_PORT'),
-  // username: configService.get('TYPEORM_USERNAME'),
-  // password: configService.get('TYPEORM_PASSWORD'),
-  // database: configService.get('TYPEORM_DATABASE'),
-  // synchronize: configService.get('TYPEORM_SYNCHONIZE'),
-  // logging: configService.get('TYPEORM_LOGGING'),
-  // entities: [configService.get('TYPEORM_ENTITIES')],
-  // migrations: [configService.get('TYPEORM_MIGRATIONS')],
-  // subscribers: [configService.get('TYPEORM_SUBSCRIBERS')],
-  // migrationsTableName: configService.get('TYPEORM_MIGRATIONS_TABLE_NAME'),
+  host: process.env.TYPEORM_HOST,
+  port: Number(process.env.TYPEORM_PORT),
+  username: process.env.TYPEORM_USERNAME,
+  password: process.env.TYPEORM_PASSWORD,
+  database: process.env.TYPEORM_DATABASE,
+  synchronize: Boolean(process.env.TYPEORM_SYNCHONIZE),
+  logging: Boolean(process.env.TYPEORM_LOGGING),
+  entities: [process.env.TYPEORM_ENTITIES],
+  migrations: [process.env.TYPEORM_MIGRATIONS],
+  subscribers: [process.env.TYPEORM_SUBSCRIBERS],
+  migrationsTableName: process.env.TYPEORM_MIGRATIONS_TABLE_NAME,
 });
