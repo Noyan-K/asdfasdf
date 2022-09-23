@@ -12,7 +12,7 @@ export const typeOrmConfig: DataSourceOptions = {
   database: process.env.TYPEORM_DATABASE,
   synchronize: Boolean(process.env.TYPEORM_SYNCHONIZE),
   logging: Boolean(process.env.TYPEORM_LOGGING),
-  entities: [process.env.TYPEORM_ENTITIES],
+  entities: [`${process.env.TYPEORM_ENTITIES}`],
   migrations: [process.env.TYPEORM_MIGRATIONS],
   subscribers: [process.env.TYPEORM_SUBSCRIBERS],
   migrationsTableName: process.env.TYPEORM_MIGRATIONS_TABLE_NAME,
