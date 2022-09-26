@@ -64,20 +64,20 @@ export class UsersService {
         email: updateUserDto.email,
       });
 
-      if (findSimularUser && findSimularUser?.id !== id) {
-        throw new BadRequestException(
-          `Пользователь с email:${recivedUser.email} уже существует.`,
-        );
-      }
-
       if (!recivedUser) {
         throw new NotFoundException();
       }
 
-      const updatedUser = await this.userRepository.update(
-        recivedUser,
-        updateUserDto,
-      ); //! How to get updated user???
+      if (findSimularUser && findSimularUser?.id !== id) {
+        throw new BadRequestException(
+          `Пользователь с email:${updateUserDto.email} уже существует.`,
+        );
+      }
+
+      const updatedUser = await this.userRepository.save({
+        ...recivedUser,
+        ...updateUserDto,
+      });
 
       return updatedUser;
     } catch (error) {

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { BadRequestException } from '@nestjs/common/exceptions';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { BADQUERY, NOTFOUND } from 'dns';
 import { User } from '../entities/user.entity';
 import { UsersController } from '../users.controller';
 import { UsersService } from '../users.service';
@@ -13,21 +13,21 @@ describe('UsersController', () => {
       fullname: 'User Userson',
       email: 'user@gmail.com',
       password: '1234',
-      id: 0,
+      id: 1,
       isActivated: false,
     },
     {
       fullname: 'User1 Userson1',
       email: 'user1@gmail.com',
       password: '1234',
-      id: 1,
+      id: 2,
       isActivated: false,
     },
     {
       fullname: 'User2 Userson2',
       email: 'user2@gmail.com',
       password: '1234',
-      id: 2,
+      id: 3,
       isActivated: false,
     },
   ];
@@ -89,19 +89,24 @@ describe('UsersController', () => {
     jest.clearAllMocks();
   });
 
-  it('should find all users', async () => {
+  it('findAll (success): should find all users', async () => {
     expect(await usersController.findAll()).toStrictEqual(usersTable);
   });
 
-  it('should find one user by id', async () => {
-    expect(await usersController.findOne(2)).toStrictEqual(usersTable[2]);
+  it('findOne (success): should find one user by id', async () => {
+    expect(await usersController.findOne(2)).toStrictEqual(usersTable[1]);
   });
 
-  it("shouldn't find one user by id", async () => {
-    expect(await usersController.findOne(32)).toThrowError('');
+  it('findOne (error): should throw error (Not Found)', async () => {
+    try {
+      await usersController.findOne(32);
+    } catch (e) {
+      expect(e).toBeInstanceOf(BadRequestException);
+      expect(e.message).toBe('Not Found');
+    }
   });
 
-  it('should create a new user', async () => {
+  it('create (success): should create a new user', async () => {
     expect(
       await usersController.create({
         fullname: 'User12 Userson12',
@@ -117,17 +122,69 @@ describe('UsersController', () => {
     });
   });
 
-  it('should update user by id', async () => {
+  it('create (error): should throw error (email already exists)', async () => {
+    try {
+      await usersController.create({
+        fullname: 'User1 Userson1',
+        email: 'user1@gmail.com',
+        password: '1234',
+      });
+    } catch (e) {
+      expect(e).toBeInstanceOf(BadRequestException);
+      expect(e.message).toBe(
+        'Пользователь с email:user1@gmail.com уже существует.',
+      );
+    }
+  });
+
+  it('update (success): should update user by id', async () => {
     expect(
       await usersController.update(2, {
         fullname: 'User12 Userson12',
         email: 'user12@gmail.com',
         password: '1234',
       }),
-    ).toStrictEqual(usersTable[2]);
+    ).toStrictEqual(usersTable[1]);
   });
 
-  it('should remove user by id', async () => {
-    expect(await usersController.remove(2)).toStrictEqual(usersTable[2]);
+  it('update (error): should throw error (Not Found)', async () => {
+    try {
+      await usersController.update(212, {
+        fullname: 'User12 Userson12',
+        email: 'user12@gmail.com',
+        password: '1234',
+      });
+    } catch (e) {
+      expect(e).toBeInstanceOf(BadRequestException);
+      expect(e.message).toBe('Not Found');
+    }
+  });
+
+  it('update (error): should throw error (email already exists)', async () => {
+    try {
+      await usersController.update(1, {
+        fullname: 'User1 Userson1',
+        email: 'user1@gmail.com',
+        password: '1234',
+      });
+    } catch (e) {
+      expect(e).toBeInstanceOf(BadRequestException);
+      expect(e.message).toBe(
+        'Пользователь с email:user1@gmail.com уже существует.',
+      );
+    }
+  });
+
+  it('remove (success): should remove user by id', async () => {
+    expect(await usersController.remove(2)).toStrictEqual(usersTable[1]);
+  });
+
+  it('remove (error): should throw error (Not Found)', async () => {
+    try {
+      await usersController.remove(212);
+    } catch (e) {
+      expect(e).toBeInstanceOf(BadRequestException);
+      expect(e.message).toBe('Not Found');
+    }
   });
 });
